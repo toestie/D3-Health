@@ -99,7 +99,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, nodeGroup) {
     }
 
     const toolTip = d3.tip()
-        .attr("class", "tooltip")
+        .attr("class", "tooltip d3-tip")
         .offset([80, -60])
         .html(function(d) {
             return (`${ylabel} ${d[chosenYAxis]}<br>${xlabel} ${d[chosenXAxis]}`);
@@ -215,7 +215,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, nodeGroup) {
         .text("Lacks Healthcare (%)")
         .classed("active", true)
     
-    const nodeGroup = chartGroup.selectAll('.nodes')
+    var nodeGroup = chartGroup.selectAll('.nodes')
         .data(healthData)
         .enter().append('g')
         .attr('class', 'nodes')
