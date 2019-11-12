@@ -74,11 +74,53 @@ function renderNodes(nodeGroup, newXScale, chosenXAxis, newYScale, chosenYAxis) 
     return nodeGroup;
 }
 
+function updateToolTip(chosenXAxis, chosenYAxis, nodeGroup) {
+    let xlabel  = "";
+    let ylabel  = "";
+
+    if (chosenXAxis === "poverty") {
+        xlabel = "In Poverty (%):";
+    }
+    else if (chosenXAxis === "age"){
+        xlabel = "Median Age (years):";
+    }
+    else {
+        xlabel = "Median Household Income ($):";
+    }
+
+    if (chosenYAxis === "healthcare") {
+        ylabel = "Lacks Healthcare (%):";
+    }
+    else if (chosenYAxis === "smokes"){
+        ylabel = "Smokes (%):";
+    }
+    else {
+        ylabel = "Obese (%):";
+    }
+
+    const toolTip = d3.tip()
+        .attr("class", "tooltip")
+        .offset([80, -60])
+        .html(function(d) {
+            return (`${ylabel} ${d[chosenYAxis]}<br>${xlabel} ${d[chosenXAxis]}`);
+        });
+
+    nodeGroup.call(toolTip);
+
+    nodeGroup.on("mouseover", function(data) {
+        toolTip.show(data, this);
+    })
+    .on("mouseout", function(data, index) {
+        toolTip.hide(data, this);
+    });
+
+    return nodeGroup;
+}
+
 (async function(){
-    const healthData = await d3.csv("/assets/data/data.csv").catch(error => console.warn(error));
+    const healthData = await d3.csv("./assets/data/data.csv").catch(error => console.warn(error));
     // console.log(healthData);
 
-    // Cast each hours value in tvData as a number using the unary + operator
     healthData.forEach(function(data) {
         data.healthcare = +data.healthcare;
         data.poverty = +data.poverty;
@@ -195,6 +237,8 @@ function renderNodes(nodeGroup, newXScale, chosenXAxis, newYScale, chosenYAxis) 
 
     nodeGroup.attr("transform", d => `translate(${xScale(d[chosenXAxis])}, ${yScale(d[chosenYAxis])})`)
 
+    nodeGroup = updateToolTip(chosenXAxis, chosenYAxis, nodeGroup);
+
     xLabels.selectAll("text")
     .on("click", function() {
     // get value of selection
@@ -210,9 +254,7 @@ function renderNodes(nodeGroup, newXScale, chosenXAxis, newYScale, chosenYAxis) 
             xAxis = renderXAxis(xNewScale, xAxis);
 
             nodesGroup = renderNodes(nodeGroup, xNewScale, chosenXAxis, yNewScale, chosenYAxis);
-
-            // // updates tooltips with new info
-            // circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
+            nodesGroup = updateToolTip(chosenXAxis, chosenYAxis, nodesGroup);
 
             if (value === "age") {
                 xAge
@@ -264,9 +306,7 @@ function renderNodes(nodeGroup, newXScale, chosenXAxis, newYScale, chosenYAxis) 
             yAxis = renderYAxis(yNewScale, yAxis);
     
             nodesGroup = renderNodes(nodeGroup, xNewScale, chosenXAxis, yNewScale, chosenYAxis);
-    
-            // // updates tooltips with new info
-            // circlesGroup = updateToolTip(chosenXAxis, circlesGroup);
+            nodesGroup = updateToolTip(chosenXAxis, chosenYAxis, nodesGroup);
     
             if (value === "smokes") {
                 ySmokes
